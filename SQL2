@@ -90,7 +90,7 @@ card:='';
 SELECT * INTO m FROM movie WHERE trim(lower(official_title)) = trim(lower(movie_title));
 IF FOUND THEN
 card:=m.official_title || ' - ' || m.year || ' durata: ' || m.length || ' minuti ' || E'\n';
-FOR d_country, d_date, d_title IN SELECT country.name, to_char(released.released, 'DD-MM-YYYY'), released.title FROM released INNER JOIN country ON released.country = country.iso3 WHERE released.movie = m.id
+FOR d_country, d_date, d_title IN SELECT country.name, to_char(released.released, 'YYYY-MM-DD'), released.title FROM released INNER JOIN country ON released.country = country.iso3 WHERE released.movie = m.id
 LOOP
 IF(d_country IS NOT NULL) THEN
     card:= card || E'\t' || 'distributed in' || d_country; 
