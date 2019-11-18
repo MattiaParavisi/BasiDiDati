@@ -1,0 +1,21 @@
+CREATE OR REPLACE function get_movie_trivia(movie_title varchar(200)) RETURNS trivia
+AS
+$$
+DECLARE
+t_var trivia%ROWTYPE;
+
+BEGIN
+
+SELECT movie.id, movie.official_title INTO t_var.movie_id, t_var.movie_title FROM movie WHERE TRIM(LOWER($1)) = TRIM(LOWER(official_title));
+
+SELECT String_agg(genre, ' ,') INTO t_var.genre FROM genre WHERE TRIM(LOWER(movie)) = TRIM(LOWER(t_var.movie_id));
+
+SELECT material.id INTO t_var.trivia FROM material WHERE lang = 'eng' AND description = 'movie trivia' AND TRIM(LOWER(movie)) = TRIM(LOWER(t_var.movie_id)) ORDER BY random() LIMIT 1;
+
+RETURN t_var;
+END;
+$$
+LANGUAGE plpgsql;
+
+SELECT * FROM get_movie_trivia('inception')
+
