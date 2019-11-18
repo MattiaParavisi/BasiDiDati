@@ -1,0 +1,20 @@
+CREATE OR REPLACE FUNCTION insert_movie_rating(movie_title varchar(200), source varchar(200),check_data date, scala numeric, votes integer, score numeric) RETURNS char 
+AS
+$$
+DECLARE
+is_movie movie.official_title%TYPE;
+
+BEGIN 
+
+SELECT movie.official_title INTO is_movie FROM movie WHERE TRIM(LOWER(movie.official_title)) = TRIM(LOWER($1));
+IF is_movie IS NULL THEN
+RETURN 1;
+ELSE
+INSERT INTO rating(check_date, source, movie, scale, votes, score) VALUES ($3, $2, $1, $4, $5, $6);
+END IF;
+RETURN 0;
+END;
+$$
+LANGUAGE plpgsql;
+
+SELECT insert_movie_rating('1375666', 'me', date('1999-10-15'), 10, 10, 10);
