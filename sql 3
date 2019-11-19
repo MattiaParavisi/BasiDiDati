@@ -1,0 +1,58 @@
+EXCEPTION
+
+        WHEN unique_violation THEN                                      //errore di chiave primaria duplicata          
+            RAISE INFO 'Errore, si sta inserendo una chiave duplicata'; 
+            RETURN '1'; 
+        WHEN foreign_key_violation THEN                                 //errore sulla chiave esterna
+            RAIS INFO E'L\'inserimento ha prodotto una violazione dei vincoli di chiave esterna';
+            RETURN '2';
+
+END;
+
+Il trigger funziona del tipo "Quando succede qualcosa faccio qualcosa d'altro"
+Il trigger è legato alla tabella, le funzioni no.
+Il trigger non può avere parametri e restituisce un tipo "trigger"
+Il trigger è invocato automaticamente
+"Tutte le volte che fai l'elimina: decremanta tutti gli id di 1 e restituisci la riga eliminata" <-- Lo devo fare su ogni singola tabella se voglio che funzioni per ogni tabella
+Ho due variabili nuove : "OLD" e "NEW", sono entrambe variabili di tipo record. NEW è disponibile in caso di trigger sollevati da INSERT/UPDATE, NULL in trigger diversi.
+OLD è disponiile in caso di trigger sollevati da UPDATE/DELETE...
+//
+INSERT mia mamma in cariola 
+NEW: mia mamma in cariola
+OLD: NULL
+//
+DELETE mia mamma in cariola
+NEW: null
+OLD: mia mamma in cariola
+//
+UPDATE mia mamma in carriola IN mia nonna in cariola
+NEW: mia nonna in carriola
+OLD: mia mamma in carriola
+
+RAISE:
+DEBUG || LOG || INFO || NOTICE || WARNING <-- QUESTI LIVELLI DI RAISE NON CAUSANO L'INTERRUZIONE DELLA PROCEDURA IN ESECUZIONE.
+
+EXCEPTION WHEN:
+unique_violation , foreign_key_violation, not_null_violation.
+
+PERFORM: vedila come una select, se esiste già una tupla con quei valori in quella tabella allora. Non fa la insert, la simula.
+//dopo aver inserito una roba faccio qualcosa di altro
+CREATE TRIGGER person_location_trigger AFTER INSERT OR UPDATE ON location FOR EACH ROW EXECUTE PROCEDURE check_person_location();
+//prima di inserire i valori valuto 
+CREATE TRIGGER person_location_trigger BEFORE INSERT OR UPDATE ON location FOR EACH ROW EXECUTE PROCEDURE check_person_location();
+DROP TRIGGER person_location_trigger ON location;
+
+
+Cosa è una vista? Una porzione di tabella // Limitare le informazioni visibili a un gruppo di utenti
+Vista materializzata : perennemente su db
+La vista è una tabella con altre informazioni: cosa cazzo serve una vista? posso fare un join tra altre tabelle e fottermene della vista, perchè devo fare una vista che mi dica che valerio bellandi prende 10000000 di euro al minuto. 
+Servono per evitare troppi join (sono molto pesanti), se ho 10000 utenti e ogni utente mi usa la query 5000 volte al minuto forse è meglio che io materializzi una vista. Devo però stare attento al concetto di non duplicazione dei dati 
+
+Creo una vista con un botto di roba ma, se ogni cazzo di volta che inserisco qualcosa sfappo tutto perchè non aggiorno la tabella, uso un trigger, ogni volta che qualcuno inserisce qualcosa di nuovo uso un TRIGGER  e ricalcolo il valore per solo quello.
+Prima inserisco in rating poi faccio sulla tabella, ma se canno su rating? uso un altro trigger sull'inserimento:
+BEFORE verifico
+AFTER aggiorno
+le viste vranno mai degli insert da qualche parte? MAI, gestisco le viste con i trigger
+Sono tabelle autopopolanti
+
+FINE DEI TRIGGER
