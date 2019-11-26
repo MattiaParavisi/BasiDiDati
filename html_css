@@ -1,0 +1,88 @@
+html --> struttura
+css --> parte visualizzativa
+scripting server/client side --> schemi che visualizzano dati
+http funziona sulla porta 80 --> tutti i computer hanno un indirizzo ip che li identifica in modo univoco all'interno della loro rete, parlano un linguaggio ad esempio il TCP, il TCP usa delle porte, la 80 è la porta del tcp www.google.it:80 <-- scontata
+Se uso HTTPS è la 443.
+Useremo la 80, visto che sono le NOSTRE pagine, se usassimo la 443 dovremmo generare un certificato
+
+HTML 
+<!DOCTYPE html> <-- non obbligatoria, specifica solo il tipo di file che sto per scrivere
+
+Utilizza POST / GET
+carssimo google dammi la pagina google -> voglio i parametri in modo esplicito (GET/voglio i parametri nell url) o voglio i parametri in modo implicito (POST/non voglio i parametri nell'url)
+
+APACHEE
+web server open source 
+predefinito sulla porta 80
+
+PHP 
+// commenti su singola riga
+/* commenti multipli
+variabili indicate con $
+ii nomi delle variabili sono Case Sensitive
+Un nome di variabile deve iniziare con una lettera o con il simbolo underscore seguiti da una serie qualsiasi di lettere numeri o altri underscore
+Il php non ha tipi, a volte canna clamorosamente
+Se faccio Gettype($var) mi da il tipo di var a runtime
+$var = 9
+is_int($var) returna true 
+se è sbagliato devo castare
+is_string($var) returna false posso fare $var = "9"
+is_null($var) false, assume il tippo quando la inizializzo
+Tipi:
+BOOLEAN
+se converto 0 0.0 "" "0" array_vuoto NULL in BOOLEAN ottengo falso
+INTERI
+posso usare le basi diverse per descrivere gli interi
+$int = 0xbbajai
+FLOAT
+STRING
+sequenza arbitraria di caratteri ASCII
+apici singoli = stringa statica $string = 'ciao'
+apici doppi = caratteri di controllo + sostituzione delle variabili
+$nome = 'stefano'
+$string = "il mio nome è $nome \n"
+ARRAY
+un arrya PHP è una mappa ordinata 
+accedo con funzioni o con []
+$myarray = array(1 => 'Paolo', 2 => 'Rossi')
+Le chiavi e i valori possono avere tipi diversi 
+$myarray = array('numeri'=>23, 2=>'sole') -- nell'array ci sono sia stringhe sia numeri array[2] == Sole && array[numero] == 23
+La posizione può essere fatta da stringhe
+Se non specifico niente mette lui gli indici giusti 
+$myarray = array(12,23,34,45,556,768,887,18,19)
+Se non metto nulla fa tutto lui
+se invece faccio
+$myarray = array(13=> uno, 16=>due, tre);
+tre lo metto in 17=>tre
+per aggiungere un elemento a un array di 10 elementi nell'undicesima posizione posso fare arr[11] = 12 è dinamico
+posso fare unset(9) elimina l'elemento con CHIAVE 9
+== Uguaglianza
+=== Identità, controlla anche i tipi
+!= <> Disuguaglianza
+!== Non identità
+< MInore
+> Maggiore
+<= MInore uguale
+>= Maggiore uguale
+CONTROLLO
+if else if else
+while do while
+for	(devo dirgli io quanto andare)
+foreach (se ho un array di 5 lo fa da solo di 5 -- comodo per scorrere gli array, non devo sapere la dimensione)
+switch-case
+foreach inoltre è utilissimo perchè le chiavi possono anche non essere numeriche, se use librerie che non ho scitto io non so cosa cazzo ci sia nell'array
+COSTRUTTO BREAK ESISTE
+COSTRUTTO CONTINUE CONTINUE -- Salta le istruzioni dopo di lui e riparte con il ciclo successivo
+VARIABILI SUPERGLOBALS
+varaibili sempre disponibili : d'ambiente, sessione...
+$GLOBALS contiene i riferimenti alle variabili gloabli dello script
+$_SERVER web server
+$_REQUEST
+$_ENV caratteristiche dell'ambiente linux windows
+$_COOKIE variabili trasmesse allo script del borwser con cookie 
+......
+
+Parametri già visti (GTE / POST)
+
+i parametri passati con GET sono accessiibli tramite l'array $_(GET) http:..........'id' = 20 && 'length' = 3 per questo molto spesso non è utile avere indici numerici ma è meglio avere indici letterali, uso il metodo get per passare i parametir 
+Con POST è la stessa cosa
