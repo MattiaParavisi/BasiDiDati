@@ -1,0 +1,109 @@
+In sql devo verificare l'SQLCODE, il codice che mi dice se la query è andata a buon fine se:
+SQLCODE = 0 tutto ok
+SQLCODE < 0 errore
+SQLCODE = 100 NULL
+è importante fare questa verifica ogni volta che si implementa una nuova funzione;
+
+Le funzioni in sql una volta che le faccio sono disponibili per essere eseguite, per eseguirla devo fare:
+
+--> ######## SELECT * FROM nome_funzione('nomeparametro'); ########### <--
+
+ES.1 Dato un film torna tutti i voti che ha preso 
+
+CREATE OR REPLACE FUNCTION get_movie_ratings(varchar(200)) RETURNS SETOF rating AS
+$$
+DECLARE 
+a_rating rating%ROWTYPE;
+BEGIN
+    FOR a_rating IN SELECT * FROM movie INNER JOIN rating ON movie.id = rating.movie WHERE TRIM(LOWER(official_title)) = TRIM(LOWER($1))
+    LOOP
+        RETURN NEXT a_rating;
+    END LOOP;
+END;
+$$
+language plpgsql;
+
+CANNATA, IO RESTITUISCO LE RIGHE DEL TIPO (MOVIE INNERJOIN RATING) non RATING, devo modificare il select * con select(//campi di rating)
+
+CREATE OR REPLACE FUNCTION get_movie_ratings(varchar(200)) RETURNS SETOF rating AS
+$$
+DECLARE 
+a_rating rating%ROWTYPE;
+BEGIN
+    FOR a_rating IN SELECT check_date,source,movie,scale,votes,score FROM movie INNER JOIN rating ON movie.id = rating.movie WHERE TRIM(LOWER(official_title)) = TRIM(LOWER($1))
+    LOOP
+        RETURN NEXT a_rating;
+    END LOOP;
+END;
+$$
+language plpgsql;
+
+per provarla : SELECT * FROM get_movie_ratings('inception');
+
+Si può migliorare ulteriormente la funzione modificando tutte le righe del select con rating.*, che seleziona automaticamente tute le righe della tabella rating, così facendo se un giorno aggiornerò le colonne della tabella rating, se mantenessi il vecchio select(nomi parametri rating) otterrei un errore a causa della nuova aggiunta, con la nuova soluzione fa tutto in automatico in modo corretto
+
+CREATE OR REPLACE FUNCTION get_movie_ratings(varchar(200)) RETURNS SETOF rating AS
+$$
+DECLARE 
+a_rating rating%ROWTYPE;
+BEGIN
+    FOR a_rating IN SELECT rating.* FROM movie INNER JOIN rating ON movie.id = rating.movie WHERE TRIM(LOWER(official_title)) = TRIM(LOWER($1))
+    LOOP
+        RETURN NEXT a_rating;
+    END LOOP;
+END;
+$$
+language plpgsql;
+
+////RETURN QUERY INTERA
+BEGIN
+    RETURN QUERY SELECT rating.* FROM movie INNER JOIN rating ON movie.id = rating.movie WHERE      TRIM(LOWER(official_title)) = TRIM(LOWER($1));
+END;
+
+
+CREATE OR REPLACE FUNCTION get_movie_cast(movie_title varchar(200)) RETURNS SETOF person AS
+$$
+DECLARE 
+actor person%ROWTYPE;
+BEGIN
+FOR actor IN SELECT * FROM person WHERE id IN(SELECT person FROM crew INNER JOIN movie ON crew.movie=movie.id WHERE (TRIM(LOWER(official_title))=TRIM(LOWER(movie_title)) AND (p_role='actor')))
+LOOP
+ RETURN NEXT actor;
+END LOOP;
+END;
+$$
+language plpgsql
+
+IN unisce due tabelle dove il campo uno è uguale al campo della tabella due
+restituiscimi della tabella person tutte le righe che contengono il valore X
+
+CREATE OR REPLACE FUNCTION get_movie_card(movie_title varchar(200)) RETURNS text AS
+$$
+DECLARE
+m movie%ROWTYPE;
+d_country country.name%TYPE;
+d_date released.released%TYPE;
+d_title released.title%TYPE
+card TEXT;
+BEGIN
+card:='';
+SELECT * INTO m FROM movie WHERE trim(lower(official_title)) = trim(lower(movie_title));
+IF FOUND THEN
+card:=m.official_title || ' - ' || m.year || ' durata: ' || m.length || ' minuti ' || E'\n';
+FOR d_country, d_date, d_title IN SELECT country.name, to_char(released.released, 'YYYY-MM-DD'), released.title FROM released INNER JOIN country ON released.country = country.iso3 WHERE released.movie = m.id
+LOOP
+IF(d_country IS NOT NULL) THEN
+    card:= card || E'\t' || 'distributed in' || d_country; 
+IF (d_date IS NOT NULL) THEN
+    card:= card || 'in data' || d_date;
+    END IF;
+IF (d_title IS NOT NULL) THEN
+    card:= card || ' con il titolo ' || d_title;
+END LOOP;
+ELSE 
+ card:="fanculo";
+END IF;
+RETURN card;
+END
+$$
+LANGUAGE plpgsql;
