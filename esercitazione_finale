@@ -1,0 +1,110 @@
+CREATE OR REPLACE FUNCTION top10movie() RETURNS table(title varchar(200),year character(4),score numeric)
+AS
+$$
+BEGIN
+RETURN QUERY
+SELECT movie.official_title, movie.year, movie_score.score
+FROM movie_score
+JOIN movie
+ON movie_score.movie = movie.id
+ORDER BY score DESC
+LIMIT 10;
+END;
+$$
+LANGUAGE plpgsql
+
+CREATE OR REPLACE FUNCTION top10movie() RETURNS table(title varchar(200),year character(4),score numeric)
+AS
+$$
+BEGIN
+RETURN QUERY
+SELECT imdb.movie.official_title, imdb.movie.year, imdb.movie_score.score
+FROM imdb.movie_score
+JOIN imdb.movie
+ON imdb.movie_score.movie = imdb.movie.id
+ORDER BY score DESC
+LIMIT 10;
+END;
+$$
+LANGUAGE plpgsql
+
+<!DOCTYPE html>
+<html>
+<head>
+    VISUALIZZAZIONE TOP 10 FILM
+    <br>
+</head>
+<body>
+    <?php
+        $dba = pg_connect("host= localhost port = 5432 user = mattiaparavisi password = quaterparais99 dbname = mattiaparavisi_imdb");
+        $sql = "SELECT * FROM imdb.top10movie() ";
+        $resource = pg_prepare($dba, "cmd", $sql);
+        $value = array();
+        $resource = pg_execute($dba, "cmd", $value);
+        $row = pg_fetch_array($resource, NULL , PGSQL_ASSOC);
+        $num = pg_num_rows($resource);
+        for($i = 0; $i<$num; $i++){
+	        $row = pg_fetch_array($resource, $i, PGSQL_ASSOC);
+	        echo $i+1, " ",$row['title'], " ", $row['year'], " ", $row['score'], "<br>";
+        }
+    ?>
+</body>
+</html>
+
+WITH actor(id, titolo, attori) AS(
+SELECT movie.id, movie.official_title, COUNT(crew.p_role)
+FROM movie
+JOIN crew
+ON movie.id = crew.movie
+WHERE crew.p_role = 'actor'
+GROUP BY  movie.id, movie.official_title
+)
+SELECT * 
+FROM actor 
+ORDER BY attori DESC
+
+TOPKMOVIE
+
+CREATE OR REPLACE FUNCTION topKmovie(numer_of_movie integer) RETURNS table(title varchar(200),year character(4),score numeric)
+AS
+$$
+BEGIN
+RETURN QUERY
+SELECT movie.official_title, movie.year, movie_score.score
+FROM movie_score
+JOIN movie
+ON movie_score.movie = movie.id
+ORDER BY score DESC
+LIMIT $1;
+END;
+$$
+LANGUAGE plpgsql
+
+STESSA COSA DI QUELLO SOTTO SENZA FUNZIONE
+
+CREATE OR REPLACE FUNCTION topmoviecast() RETURNS table(id varchar(4),title varchar(200), attori numeric)
+AS
+$$
+BEGIN
+RETURN QUERY
+WITH actor(id, titolo, attori) AS(
+SELECT movie.id, movie.official_title, COUNT(crew.p_role)
+FROM movie
+JOIN crew
+ON movie.id = crew.movie
+WHERE crew.p_role = 'actor'
+GROUP BY  movie.id, movie.official_title
+)
+SELECT * 
+FROM actor 
+ORDER BY attori DESC;
+END;
+$$
+LANGUAGE plpgsql
+
+ESERCIZIO PART 2
+
+SELECT official_title, (SELECT count(*) FROM get_movie_cast(m.official_title)) as cast_component
+FROM movie m
+ORDER BY cast_component DESC
+LIMIT 10
